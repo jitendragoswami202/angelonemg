@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,13 +6,11 @@
         function getToken() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get("jwtToken");
-
             if (token) {
-                console.log("Extracted Token:", token);  // Debugging Log
                 localStorage.setItem("angelOneToken", token);
-                window.location.href = "https://angelonemg.netlify.app/dashboard"; // Update your dashboard URL
+                window.location.href = "https://your_dashboard_url.com"; // Replace with your dashboard
             } else {
-                alert("Authentication Failed! Token not found.");
+                alert("Authentication Failed! Please login again.");
             }
         }
         window.onload = getToken;
