@@ -11,14 +11,14 @@
 
     <script>
         function redirectToAngelOne() {
-            const clientId = "yUdbvecQ";  //
-            const redirectURL = "https://angelonemg.netlify.app/redirect.html";
+            const clientId = "API_Key";  // ⚠️ API Key को Secure रूप से Store करें
+            const redirectURL = "https://angelonemg.netlify.app/redirect.html"; // ✅ Correct Redirect URL
 
-            
+            // ✅ Proper Encoding & String Formatting
             const authUrl = `https://smartapi.angelbroking.com/publisher-login?api_key=${encodeURIComponent(clientId)}&redirect_url=${encodeURIComponent(redirectURL)}`;
 
-            
-            window.location.href = authUrl;
+            // 🔗 Redirect to Angel One Login
+            window.location.href = authUrl; // ✅ Corrected "location"
         }
     </script>
 </body>
