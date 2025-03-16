@@ -9,20 +9,13 @@
             const token = urlParams.get("jwtToken");
 
             if (token) {
-                // Save token in localStorage with an expiry time
-                localStorage.setItem("angelOneToken", JSON.stringify({
-                    token: token,
-                    expiry: Date.now() + 43200000 // Token expires in 12 hour
-                }));
-
-                // Redirect to the dashboard
-                window.location.href = "https://angelonemg.netlify.app/dashboard";
+                console.log("Extracted Token:", token);  // Debugging Log
+                localStorage.setItem("angelOneToken", token);
+                window.location.href = "https://angelonemg.netlify.app/dashboard"; // Update your dashboard URL
             } else {
-                alert("Authentication Failed! Please login again.");
-                window.location.href = "https://angelonemg.netlify.app/";
+                alert("Authentication Failed! Token not found.");
             }
         }
-
         window.onload = getToken;
     </script>
 </head>
