@@ -2,8 +2,20 @@
 <html>
 <head>
     <title>Angel One Redirect</title>
+    <script>
+        // URL से token को extract करना
+        function getToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get("jwtToken");
+            if (token) {
+                localStorage.setItem("angelOneToken", token);
+                window.location.href = "your_dashboard_url_here"; // अपनी डैशबोर्ड URL डालो
+            }
+        }
+        window.onload = getToken;
+    </script>
 </head>
 <body>
-    <h1>Redirect Successful</h1>
+    <h1>Redirecting...</h1>
 </body>
 </html>
