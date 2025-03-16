@@ -11,12 +11,14 @@
 
     <script>
         function redirectToAngelOne() {
-            const clientId = "yUdBvecQ";  //
-            const redirectUrl = "https://angelonemg.netlify.app/redirect.html";  // 
+            const clientId = "yUdbvecQ";  //
+            const redirectURL = "https://angelonemg.netlify.app/redirect.html";
 
-            const authUrl = `https://smartapi.angelbroking.com/publisher-login?api_key=${clientId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
+            
+            const authUrl = `https://smartapi.angelbroking.com/publisher-login?api_key=${encodeURIComponent(clientId)}&redirect_url=${encodeURIComponent(redirectURL)}`;
 
-            window.location.href = authUrl;  // 
+            
+            window.location.href = authUrl;
         }
     </script>
 </body>
