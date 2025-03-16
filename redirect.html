@@ -6,21 +6,40 @@
     <title>Redirecting...</title>
     <script>
         function getAuthCode() {
+            // Get auth_code from either URL params or hash fragment
             const urlParams = new URLSearchParams(window.location.search);
-            const authCode = urlParams.get("auth_code");
+            let authCode = urlParams.get("auth_code");
+
+            if (!authCode) {
+                // If auth_code is not found in query params, check in hash fragment
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                authCode = hashParams.get("auth_code");
+            }
 
             if (authCode) {
-                localStorage.setItem("auth_code", authCode);
-                window.location.href = "dashboard.html"; // Change if needed
+                // Use sessionStorage instead of localStorage (Optional)
+                sessionStorage.setItem("auth_code", authCode);
+                console.log("✅ Auth Code Received:", authCode);
+
+                // Redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";  // Ensure this file exists
+                }, 1000);
             } else {
-                alert("Authentication Failed! Please login again.");
-                window.location.href = "index.html"; // Redirect to login page
+                alert("❌ Authentication Failed! Please login again.");
+                console.error("Auth Code Not Found");
+
+                // Redirect to login page after a delay
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1000);
             }
         }
+
         window.onload = getAuthCode;
     </script>
 </head>
 <body>
-    <h2>Processing Authentication...</h2>
+    <h2>Processing Authentication... Please wait.</h2>
 </body>
 </html>
