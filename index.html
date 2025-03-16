@@ -11,12 +11,12 @@
 
     <script>
         function redirectToAngelOne() {
-            const clientId = "yUdBvecQ";  // ✅ Your Angel One API Client ID
-            const redirectUrl = "https://angelonemg.netlify.app/redirect.html";  // ✅ Your Redirect Page
+            const clientId = "yUdBvecQ";  //
+            const redirectUrl = "https://angelonemg.netlify.app/redirect.html";  // 
 
             const authUrl = `https://smartapi.angelbroking.com/publisher-login?api_key=${clientId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
 
-            window.location.href = authUrl;  // ✅ Corrected this line
+            window.location.href = authUrl;  // 
         }
     </script>
 </body>
