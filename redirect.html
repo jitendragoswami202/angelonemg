@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        function getAuthCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const authCode = urlParams.get("auth_code");
+
+            if (authCode) {
+                localStorage.setItem("auth_code", authCode);
+                window.location.href = "dashboard.html"; // Change if needed
+            } else {
+                alert("Authentication Failed! Please login again.");
+                window.location.href = "index.html"; // Redirect to login page
+            }
+        }
+        window.onload = getAuthCode;
+    </script>
+</head>
+<body>
+    <h2>Processing Authentication...</h2>
+</body>
+</html>
