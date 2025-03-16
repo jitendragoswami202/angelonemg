@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Angel One Redirect</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angel One Login</title>
     <script>
-        function getToken() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get("jwtToken");
-            if (token) {
-                localStorage.setItem("angelOneToken", token);
-                window.location.href = "https://your_dashboard_url.com"; // Replace with your dashboard
-            } else {
-                alert("Authentication Failed! Please login again.");
-            }
+        function redirectToAngelOne() {
+            const clientId = "AAA603439";  // Your Angel One API Client ID
+            const redirectUrl = "https://angelonemg.netlify.app/redirect.html"; // Your Redirect Page
+            const authUrl = `https://smartapi.angelbroking.com/publisher-login?api_key=${clientId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
+
+            window.location.href = authUrl;
         }
-        window.onload = getToken;
     </script>
 </head>
 <body>
-    <h1>Redirecting...</h1>
+    <h1>Welcome to Angel One Algo Trading</h1>
+    <button onclick="redirectToAngelOne()">Login with Angel One</button>
 </body>
 </html>
