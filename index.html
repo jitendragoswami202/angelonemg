@@ -1,17 +1,28 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Angel One Redirect</title>
     <script>
-        // URL से token को extract करना
         function getToken() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get("jwtToken");
+
             if (token) {
-                localStorage.setItem("angelOneToken", token);
-                window.location.href = "your_dashboard_url_here"; // अपनी डैशबोर्ड URL डालो
+                // Save token in localStorage with an expiry time
+                localStorage.setItem("angelOneToken", JSON.stringify({
+                    token: token,
+                    expiry: Date.now() + 43200000 // Token expires in 12 hour
+                }));
+
+                // Redirect to the dashboard
+                window.location.href = "https://angelonemg.netlify.app/dashboard";
+            } else {
+                alert("Authentication Failed! Please login again.");
+                window.location.href = "https://angelonemg.netlify.app/";
             }
         }
+
         window.onload = getToken;
     </script>
 </head>
