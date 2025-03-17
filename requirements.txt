@@ -1,0 +1,6 @@
+requests
+pandas
+flask
+python-dotenv
+websocket-client  # Required for live market data streaming
+schedule          # Useful for scheduling tasks
