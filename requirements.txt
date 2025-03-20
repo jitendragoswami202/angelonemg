@@ -1,6 +1,7 @@
-requests
-pandas
-flask
-python-dotenv
-websocket-client  # Required for live market data streaming
-schedule          # Useful for scheduling tasks
+flask==3.0.0            # Web framework for API handling
+numpy==1.26.4          # Essential for numerical operations with pandas
+pandas==2.2.0          # Data handling and analysis
+python-dotenv==1.0.1   # For environment variable management
+requests==2.31.0       # API requests handling
+schedule==1.2.1        # Task scheduling
+websocket-client==1.7.0 # Live market data streaming
