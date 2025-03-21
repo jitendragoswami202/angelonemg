@@ -1,60 +1,24 @@
 import time
-from api import AngelOneAPI  # Ensure you have an API handler
-from config import SYMBOL, EXCHANGE, QUANTITY, ORDER_TYPE  # Load configuration
+import requests
+from retrying import retry
+from config import BASE_URL
 
-api = AngelOneAPI()  # Initialize API
+class TradingAPI:
+    def __init__(self):
+        self.headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
 
-def get_market_data(symbol, exchange):
-    """Fetches best bid and ask price."""
-    market_data = api.get_ltp(symbol, exchange)
-    best_bid = market_data.get('best_bid', market_data.get('ltp'))
-    best_ask = market_data.get('best_ask', market_data.get('ltp'))
-    return best_bid, best_ask
+    @retry(stop_max_attempt_number=3, wait_fixed=2000)
+    def place_order(self, order_data):
+        response = requests.post(f"{BASE_URL}/order", headers=self.headers, json=order_data)
+        response.raise_for_status()
+        return response.json()
 
-def place_order(price, order_type):
-    """Places an order at a given price."""
-    order_params = {
-        "symbol": SYMBOL,
-        "exchange": EXCHANGE,
-        "quantity": QUANTITY,
-        "order_type": ORDER_TYPE,
-        "price": price
-    }
-    response = api.place_order(order_params)
-    return response
+    def get_market_data(self, symbol, exchange):
+        response = requests.get(f"{BASE_URL}/marketdata/{symbol}/{exchange}", headers=self.headers)
+        data = response.json()
+        return data.get("best_bid", data.get("ltp")), data.get("best_ask", data.get("ltp"))
 
-def execute_trade():
-    """Executes the trading strategy."""
-    best_bid, best_ask = get_market_data(SYMBOL, EXCHANGE)
-
-    if best_ask:  # Ensure ask price is available
-        entry_price = best_ask  # Enter at the lowest ask price
-        target_price = round(entry_price * 1.01, 2)  # 1% profit target
-        stop_loss_price = round(entry_price * 0.995, 2)  # 0.5% stop loss
-
-        print(f"Placing Entry Order at {entry_price}")
-        entry_response = place_order(entry_price, "BUY")
-
-        if entry_response.get("status") == "success":
-            print(f"✅ Entry Order Placed at {entry_price}")
-
-            # Monitor price to exit
-            while True:
-                current_bid, current_ask = get_market_data(SYMBOL, EXCHANGE)
-                
-                if current_bid and current_bid >= target_price:
-                    print(f"🎯 Target Reached! Selling at {current_bid}")
-                    exit_response = place_order(current_bid, "SELL")
-                    break
-
-                elif current_bid and current_bid <= stop_loss_price:
-                    print(f"⛔ Stop Loss Hit! Selling at {current_bid}")
-                    exit_response = place_order(current_bid, "SELL")
-                    break
-                
-                time.sleep(1)  # Wait before next check
-        else:
-            print(f"❌ Order Placement Failed: {entry_response}")
-
-if __name__ == "__main__":
-    execute_trade()
+api = TradingAPI()
