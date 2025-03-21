@@ -17,7 +17,7 @@ TRADE_QUANTITY = 1
 TRADE_STRATEGY = "OPTIONS"
 
 # 🔹 Webhook URL (For Auto Trading Execution)
-WEBHOOK_URL = "your_webhook_url_here"
+WEBHOOK_URL = "https://angelonemg.netlify.app/.netlify/functions/webhook"
 
 # 🔹 Redirect URL (For API Authentication)
 REDIRECT_URL = "https://angelonemg.netlify.app"
