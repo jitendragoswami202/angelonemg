@@ -1,0 +1,17 @@
+name: Netlify Auto Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Send Webhook to Netlify
+        run: |
+          curl -X POST -d {} ${{ secrets.NETLIFY_WEBHOOK_URL }}
