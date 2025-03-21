@@ -4,8 +4,9 @@ from execution import api
 # Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-SYMBOL = "DYNAMIC_SYMBOL"  
-EXCHANGE = "NSE"
+import os
+SYMBOL = os.getenv("SYMBOL", "BANKNIFTY")  
+EXCHANGE = os.getenv("EXCHANGE", "NSE")
 ORDER_TYPE = "LIMIT"
 TRADE_PERCENTAGE = 0.8  
 

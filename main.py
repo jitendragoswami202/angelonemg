@@ -8,7 +8,7 @@ if not all([API_KEY, CLIENT_ID, SECRET_KEY]):
 
 # ✅ Angel One Authentication Function
 def authenticate():
-    url = f"{BASE_URL}/angelbroking/user/v1/loginByPassword"
+    url = f"{BASE_URL}/login"
 
     headers = {
         "Content-Type": "application/json",

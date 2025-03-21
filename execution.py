@@ -8,6 +8,8 @@ class TradingAPI:
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "X-Client-Id": CLIENT_ID,
+            "X-Secret-Key": SECRET_KEY,
         }
 
     @retry(stop_max_attempt_number=3, wait_fixed=2000)
