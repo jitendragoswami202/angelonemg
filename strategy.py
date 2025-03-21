@@ -10,9 +10,9 @@ api = AngelOneAPI()
 
 # **Auto Settings**
 SYMBOL = "NIFTY 27 Mar 24100 Call"  # Change this as per your requirement
-EXCHANGE = "NSE"  # Choose from NSE, BSE, MCX
+EXCHANGE = "NSE"
 ORDER_TYPE = "LIMIT"
-TRADE_PERCENTAGE = 0.2  # Allocate 20% of available balance for trade
+TRADE_PERCENTAGE = 0.8  # Allocate 80% of available balance for trade
 
 def get_bid_ask(symbol):
     """ Fetch live Bid-Ask price from API """
