@@ -1,50 +1,60 @@
-import requests
 import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
+import requests
+import json
 
 class OrderManager:
-    def __init__(self, api_key, access_token):
+    def __init__(self, api_key, access_token, base_url):
         self.api_key = api_key
         self.access_token = access_token
-        self.order_url = 'https://api.angelbroking.com/rest/secure/order'
+        self.base_url = base_url
 
-    def place_order(self, symbol, action, quantity, price):
+    def place_order(self, order_type, symbol, quantity, price):
         try:
-            logging.info(f'Placing {action} order for {symbol}...')
-
-            payload = {
-                'api_key': self.api_key,
-                'access_token': self.access_token,
-                'symbol': symbol,
-                'action': action,
-                'quantity': quantity,
-                'price': price
+            endpoint = f'{self.base_url}/order/place'
+            headers = {
+                'Content-Type': 'application/json',
+                'X-Api-Key': self.api_key,
+                'Authorization': f'Bearer {self.access_token}'
             }
 
-            response = requests.post(self.order_url, json=payload)
-            response.raise_for_status()
+            order_data = {
+                'symbol': symbol,
+                'quantity': quantity,
+                'price': price,
+                'order_type': order_type
+            }
 
-            data = response.json()
+            response = requests.post(endpoint, headers=headers, data=json.dumps(order_data))
+            result = response.json()
 
-            if data['status'] == 'success':
-                logging.info(f'{action} order for {symbol} placed successfully.')
-                return data['order_id']
+            if response.status_code == 200 and result.get('status') == 'success':
+                logging.info(f'{order_type} Order placed successfully: {result}')
+                return result
             else:
-                logging.error(f'Error placing order: {data}')
+                logging.error(f'Failed to place order: {result}')
                 return None
-
-        except requests.RequestException as e:
-            logging.error(f'Request error during order placement: {str(e)}')
-            return None
         except Exception as e:
-            logging.error(f'Unexpected error: {str(e)}')
+            logging.error(f'Error in placing order: {str(e)}')
             return None
 
+    def check_order_status(self, order_id):
+        try:
+            endpoint = f'{self.base_url}/order/status/{order_id}'
+            headers = {
+                'X-Api-Key': self.api_key,
+                'Authorization': f'Bearer {self.access_token}'
+            }
 
-if __name__ == "__main__":
-    order_manager = OrderManager(api_key="YOUR_API_KEY", access_token="YOUR_ACCESS_TOKEN")
-    order_id = order_manager.place_order(symbol="RELIANCE", action="BUY", quantity=1, price=2500)
-    logging.info(f'Order ID: {order_id}')
-    
+            response = requests.get(endpoint, headers=headers)
+            result = response.json()
+
+            if response.status_code == 200:
+                logging.info(f'Order status retrieved successfully: {result}')
+                return result
+            else:
+                logging.error(f'Failed to retrieve order status: {result}')
+                return None
+        except Exception as e:
+            logging.error(f'Error in retrieving order status: {str(e)}')
+            return None
+            
