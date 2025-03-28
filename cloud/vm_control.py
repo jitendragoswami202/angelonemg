@@ -13,3 +13,30 @@ def restart_bot():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
+from flask import Flask, render_template
+from flask_socketio import SocketIO
+import threading
+import time
+
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+LOG_FILE = "/home/user/algo-trading-bot/logs/bot.out.log"
+
+def stream_logs():
+    """Continuously read log file & send updates to the frontend."""
+    with open(LOG_FILE, "r") as file:
+        file.seek(0, 2)  # Move to the end of the file
+        while True:
+            line = file.readline()
+            if line:
+                socketio.emit("log_update", {"log": line})
+            time.sleep(0.5)
+
+@app.route("/")
+def index():
+    return render_template("dashboard.html")
+
+if __name__ == "__main__":
+    threading.Thread(target=stream_logs, daemon=True).start()
+    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
