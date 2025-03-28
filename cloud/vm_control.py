@@ -1,101 +1,41 @@
-from flask import Flask, jsonify
 import os
-from notifier import send_telegram_alert
+import subprocess
+import logging
 
-app = Flask(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-@app.route('/restart-bot', methods=['POST'])
-def restart_bot():
-    """Restarts the trading bot"""
-    send_telegram_alert("🔄 Restarting bot via dashboard...")
-    os.system("sudo supervisorctl restart algo_bot")
-    return jsonify({"status": "success", "message": "Bot restarted successfully"})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
-from flask import Flask, render_template
-from flask_socketio import SocketIO
-import threading
-import time
+class VMControl:
+    def __init__(self, instance_name: str, project_id: str, zone: str):
+        self.instance_name = instance_name
+        self.project_id = project_id
+        self.zone = zone
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+    def start_vm(self):
+        try:
+            logging.info(f'Starting VM: {self.instance_name}')
+            result = subprocess.run([
+                'gcloud', 'compute', 'instances', 'start', self.instance_name,
+                '--project', self.project_id,
+                '--zone', self.zone
+            ], check=True, capture_output=True, text=True)
+            logging.info(f'VM started successfully: {result.stdout}')
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Failed to start VM: {e.stderr}')
+            return False
+        return True
 
-LOG_FILE = "/home/user/algo-trading-bot/logs/bot.out.log"
-
-def stream_logs():
-    """Continuously read log file & send updates to the frontend."""
-    with open(LOG_FILE, "r") as file:
-        file.seek(0, 2)  # Move to the end of the file
-        while True:
-            line = file.readline()
-            if line:
-                socketio.emit("log_update", {"log": line})
-            time.sleep(0.5)
-
-@app.route("/")
-def index():
-    return render_template("dashboard.html")
-
-if __name__ == "__main__":
-    threading.Thread(target=stream_logs, daemon=True).start()
-    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
-from flask import Flask, jsonify
-import os
-from notifier import send_telegram_alert
-
-app = Flask(__name__)
-
-@app.route('/start-bot', methods=['POST'])
-def start_bot():
-    """Starts the bot using Supervisor"""
-    os.system("sudo supervisorctl start algo_bot")
-    send_telegram_alert("✅ Bot Started via Dashboard")
-    return jsonify({"status": "success", "message": "Bot started successfully"})
-
-@app.route('/stop-bot', methods=['POST'])
-def stop_bot():
-    """Stops the bot using Supervisor"""
-    os.system("sudo supervisorctl stop algo_bot")
-    send_telegram_alert("⛔ Bot Stopped via Dashboard")
-    return jsonify({"status": "success", "message": "Bot stopped successfully"})
-
-@app.route('/bot-status', methods=['GET'])
-def bot_status():
-    """Checks if the bot is running"""
-    status = os.popen("sudo supervisorctl status algo_bot").read()
-    running = "RUNNING" in status
-    return jsonify({"running": running})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
-from flask import Flask, jsonify, request
-import json
-import os
-
-CONFIG_FILE = "/home/user/algo-trading-bot/config.json"
-
-app = Flask(__name__)
-
-def load_config():
-    with open(CONFIG_FILE, "r") as file:
-        return json.load(file)
-
-def save_config(new_config):
-    with open(CONFIG_FILE, "w") as file:
-        json.dump(new_config, file, indent=4)
-
-@app.route('/get-settings', methods=['GET'])
-def get_settings():
-    """Returns current bot settings"""
-    return jsonify(load_config())
-
-@app.route('/update-settings', methods=['POST'])
-def update_settings():
-    """Updates bot settings"""
-    new_config = request.json
-    save_config(new_config)
-    return jsonify({"status": "success", "message": "Settings updated successfully"})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    def stop_vm(self):
+        try:
+            logging.info(f'Stopping VM: {self.instance_name}')
+            result = subprocess.run([
+                'gcloud', 'compute', 'instances', 'stop', self.instance_name,
+                '--project', self.project_id,
+                '--zone', self.zone
+            ], check=True, capture_output=True, text=True)
+            logging.info(f'VM stopped successfully: {result.stdout}')
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Failed to stop VM: {e.stderr}')
+            return False
+        return True
+        
