@@ -1,57 +1,51 @@
-# risk_manager.py - Monitors risk, stop-loss, and profit-taking
+import logging
 
-import json
-from order_manager import place_order, exit_order
-from config import TRADING_CONFIG
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Initialize position tracking
-positions = {}  # Stores current positions and P/L
-daily_loss = 0
 
-def update_positions(order_data):
-    """Updates positions based on executed trades."""
-    global daily_loss
+class RiskManager:
+    def __init__(self, max_risk_per_trade=0.01, max_positions=5):
+        self.max_risk_per_trade = max_risk_per_trade  # Maximum risk per trade as a percentage of capital
+        self.max_positions = max_positions  # Maximum number of open positions allowed
+        self.open_positions = 0
 
-    symbol = order_data["symbol"]
-    price = float(order_data["price"])
-    quantity = int(order_data["quantity"])
-    transaction_type = order_data["transaction_type"]
+    def can_place_trade(self, capital, risk_amount):
+        try:
+            logging.info('Checking if a new trade can be placed...')
 
-    if transaction_type == "BUY":
-        positions[symbol] = {"entry_price": price, "quantity": quantity}
-    elif transaction_type == "SELL":
-        if symbol in positions:
-            entry_price = positions[symbol]["entry_price"]
-            profit_loss = (price - entry_price) * quantity
-            daily_loss += profit_loss
+            if self.open_positions >= self.max_positions:
+                logging.warning('Max open positions limit reached. Cannot place more trades.')
+                return False
 
-            print(f"📉 P/L for {symbol}: {profit_loss:.2f}")
-            del positions[symbol]  # Remove position after exit
+            risk_per_trade = capital * self.max_risk_per_trade
 
-    # Check daily loss limit
-    max_loss = TRADING_CONFIG["risk_percentage"] / 100 * 100000  # Example: 1% of 1L capital
-    if daily_loss <= -max_loss:
-        print("🚨 Max daily loss reached! Closing all positions...")
-        close_all_positions()
+            if risk_amount > risk_per_trade:
+                logging.warning(f'Trade risk ({risk_amount}) exceeds allowed risk per trade ({risk_per_trade}).')
+                return False
 
-def close_all_positions():
-    """Closes all open positions when max loss is reached."""
-    for symbol in list(positions.keys()):
-        exit_order(symbol, positions[symbol]["quantity"])
-        del positions[symbol]
+            logging.info('Trade can be placed.')
+            return True
+        except Exception as e:
+            logging.error(f'Error in risk management: {str(e)}')
+            return False
 
-def check_stop_loss():
-    """Monitors stop-loss conditions and exits trades if triggered."""
-    for symbol, pos in positions.items():
-        current_price = get_live_price(symbol)
-        entry_price = pos["entry_price"]
-        stop_loss = entry_price * (1 - TRADING_CONFIG["stop_loss_percentage"] / 100)
+    def update_position(self, action):
+        if action == 'BUY':
+            self.open_positions += 1
+            logging.info(f'Position opened. Total open positions: {self.open_positions}')
+        elif action == 'SELL' and self.open_positions > 0:
+            self.open_positions -= 1
+            logging.info(f'Position closed. Total open positions: {self.open_positions}')
+        else:
+            logging.warning('Invalid action or no positions to close.')
 
-        if current_price <= stop_loss:
-            print(f"🚨 Stop-loss triggered for {symbol} at {current_price}")
-            exit_order(symbol, pos["quantity"])
-            del positions[symbol]
 
-def get_live_price(symbol):
-    """Fetches live price (dummy function, integrate with WebSocket data)."""
-    return 22000  # Example: Replace with actual live price fetching logic
+if __name__ == "__main__":
+    risk_manager = RiskManager()
+    capital = 100000  # Example capital
+    risk_amount = 500  # Example risk amount per trade
+
+    if risk_manager.can_place_trade(capital, risk_amount):
+        risk_manager.update_position('BUY')
+    risk_manager.update_position('SELL')
+    
