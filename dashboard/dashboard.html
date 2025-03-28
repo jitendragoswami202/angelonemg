@@ -35,3 +35,15 @@ document.getElementById("restart-btn").addEventListener("click", function() {
     .catch(error => alert("Error restarting bot!"));
 });
 </script>
+<div id="log-container" style="height: 300px; overflow-y: scroll; background: black; color: green; padding: 10px;"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+var socket = io.connect("http://your-server-ip:5001");
+
+socket.on("log_update", function(data) {
+    var logContainer = document.getElementById("log-container");
+    logContainer.innerHTML += data.log + "<br>";
+    logContainer.scrollTop = logContainer.scrollHeight;
+});
+</script>
