@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>📊 Live Trading Dashboard</h1>
 
+    <div id="market-data">
+        <h2>Real-Time Market Data</h2>
+        <pre id="data-feed">Waiting for live data...</pre>
+    </div>
+
+    <div id="order-section">
+        <h2>Place Order</h2>
+        <input type="text" id="symbol" placeholder="Symbol (e.g., NIFTY)">
+        <input type="number" id="quantity" placeholder="Quantity">
+        <input type="number" id="price" placeholder="Price">
+        <button onclick="placeOrder()">Place Order</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
