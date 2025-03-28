@@ -1,40 +1,60 @@
 import logging
-from order_manager import OrderManager
-from strategy import TradingStrategy
-from market_data import MarketDataFetcher
+import requests
+import json
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-class TradingBot:
-    def __init__(self, api_key, api_secret, access_token):
+class OrderManager:
+    def __init__(self, api_key, access_token, base_url):
         self.api_key = api_key
-        self.api_secret = api_secret
         self.access_token = access_token
-        self.market_data = MarketDataFetcher()
-        self.strategy = TradingStrategy()
-        self.order_manager = OrderManager(api_key, api_secret, access_token)
+        self.base_url = base_url
 
-    def run(self):
-        logging.info('Starting trading bot...')
+    def place_order(self, order_type, symbol, quantity, price):
         try:
-            while True:  # Main bot loop
-                market_data = self.market_data.fetch_data()
-                signals = self.strategy.generate_signals(market_data)
+            endpoint = f'{self.base_url}/order/place'
+            headers = {
+                'Content-Type': 'application/json',
+                'X-Api-Key': self.api_key,
+                'Authorization': f'Bearer {self.access_token}'
+            }
 
-                for signal in signals:
-                    if signal['action'] == 'BUY':
-                        self.order_manager.place_order(signal['symbol'], 'BUY', signal['quantity'])
-                    elif signal['action'] == 'SELL':
-                        self.order_manager.place_order(signal['symbol'], 'SELL', signal['quantity'])
+            order_data = {
+                'symbol': symbol,
+                'quantity': quantity,
+                'price': price,
+                'order_type': order_type
+            }
 
-        except KeyboardInterrupt:
-            logging.info('Bot stopped by user.')
+            response = requests.post(endpoint, headers=headers, data=json.dumps(order_data))
+            result = response.json()
+
+            if response.status_code == 200 and result.get('status') == 'success':
+                logging.info(f'{order_type} Order placed successfully: {result}')
+                return result
+            else:
+                logging.error(f'Failed to place order: {result}')
+                return None
         except Exception as e:
-            logging.error(f'Unexpected error: {str(e)}')
+            logging.error(f'Error in placing order: {str(e)}')
+            return None
 
+    def check_order_status(self, order_id):
+        try:
+            endpoint = f'{self.base_url}/order/status/{order_id}'
+            headers = {
+                'X-Api-Key': self.api_key,
+                'Authorization': f'Bearer {self.access_token}'
+            }
 
-if __name__ == "__main__":
-    bot = TradingBot(api_key="YOUR_API_KEY", api_secret="YOUR_API_SECRET", access_token="YOUR_ACCESS_TOKEN")
-    bot.run()
-    
+            response = requests.get(endpoint, headers=headers)
+            result = response.json()
+
+            if response.status_code == 200:
+                logging.info(f'Order status retrieved successfully: {result}')
+                return result
+            else:
+                logging.error(f'Failed to retrieve order status: {result}')
+                return None
+        except Exception as e:
+            logging.error(f'Error in retrieving order status: {str(e)}')
+            return None
+            
