@@ -47,3 +47,34 @@ socket.on("log_update", function(data) {
     logContainer.scrollTop = logContainer.scrollHeight;
 });
 </script>
+<button id="start-btn">▶ Start Bot</button>
+<button id="stop-btn">⛔ Stop Bot</button>
+<p id="bot-status">Checking bot status...</p>
+
+<script>
+var server_url = "http://your-server-ip:5001";
+
+function checkBotStatus() {
+    fetch(server_url + "/bot-status")
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("bot-status").innerText = data.running ? "✅ Bot is Running" : "⛔ Bot is Stopped";
+    });
+}
+
+document.getElementById("start-btn").addEventListener("click", function() {
+    fetch(server_url + "/start-bot", { method: "POST" })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .then(checkBotStatus);
+});
+
+document.getElementById("stop-btn").addEventListener("click", function() {
+    fetch(server_url + "/stop-bot", { method: "POST" })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .then(checkBotStatus);
+});
+
+setInterval(checkBotStatus, 5000);  // Auto-update status every 5 seconds
+</script>
