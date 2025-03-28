@@ -86,3 +86,25 @@ def cancel_order(order_id):
 if __name__ == "__main__":
     # Example: Place a test order
     place_order(symbol="NIFTY", quantity=50, order_type="LIMIT", price=22000, transaction_type="BUY")
+
+from logger import log_error
+from notifier import send_telegram_alert
+
+def place_order(symbol, quantity, price=22000):
+    """Places an order and handles errors."""
+    try:
+        response = requests.post(ORDER_URL, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            print("✅ Order Placed:", response.json())
+            return response.json()
+        else:
+            error_msg = f"❌ Order Failed: {response.text}"
+            log_error(error_msg)
+            send_telegram_alert(error_msg)
+            return None
+    
+    except Exception as e:
+        error_msg = f"⚠ Error in order execution: {str(e)}"
+        log_error(error_msg)
+        send_telegram_alert(error_msg)
