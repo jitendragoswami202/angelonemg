@@ -69,3 +69,33 @@ def bot_status():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
+from flask import Flask, jsonify, request
+import json
+import os
+
+CONFIG_FILE = "/home/user/algo-trading-bot/config.json"
+
+app = Flask(__name__)
+
+def load_config():
+    with open(CONFIG_FILE, "r") as file:
+        return json.load(file)
+
+def save_config(new_config):
+    with open(CONFIG_FILE, "w") as file:
+        json.dump(new_config, file, indent=4)
+
+@app.route('/get-settings', methods=['GET'])
+def get_settings():
+    """Returns current bot settings"""
+    return jsonify(load_config())
+
+@app.route('/update-settings', methods=['POST'])
+def update_settings():
+    """Updates bot settings"""
+    new_config = request.json
+    save_config(new_config)
+    return jsonify({"status": "success", "message": "Settings updated successfully"})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001, debug=True)
