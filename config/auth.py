@@ -1,33 +1,46 @@
-# auth.py - Handles login authentication and session token generation
-
 import requests
-import json
-from config import API_KEY, CLIENT_ID, SECRET_KEY, LOGIN_URL
+import logging
 
-def generate_token():
-    payload = {
-        "clientcode": CLIENT_ID,
-        "password": SECRET_KEY,
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "X-API-KEY": API_KEY
-    }
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    response = requests.post(LOGIN_URL, data=json.dumps(payload), headers=headers)
 
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("status") == "success":
-            print("✅ Authentication Successful!")
-            return data["data"]["token"]
-        else:
-            print("❌ Authentication Failed:", data.get("message"))
-    else:
-        print("❌ API Error:", response.status_code)
+class AngelOneAuth:
+    def __init__(self, api_key, api_secret, redirect_url):
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.redirect_url = redirect_url
+        self.access_token = None
+        self.feed_token = None
 
-    return None
+    def generate_access_token(self, request_token):
+        try:
+            logging.info('Generating access token...')
+            url = 'https://api.angelbroking.com/rest/authenticate'
+            payload = {
+                'api_key': self.api_key,
+                'api_secret': self.api_secret,
+                'redirect_url': self.redirect_url,
+                'request_token': request_token
+            }
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+            data = response.json()
 
-if __name__ == "__main__":
-    token = generate_token()
-    print("Token:", token)
+            if data['status'] == 'success':
+                self.access_token = data['data']['access_token']
+                self.feed_token = data['data']['feed_token']
+                logging.info('Access token generated successfully.')
+            else:
+                logging.error(f'Error generating access token: {data}')
+                return False
+        except requests.RequestException as e:
+            logging.error(f'Request error while generating access token: {str(e)}')
+            return False
+        return True
+
+    def get_access_token(self):
+        return self.access_token
+
+    def get_feed_token(self):
+        return self.feed_token
+        
