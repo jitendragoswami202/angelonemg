@@ -1,71 +1,53 @@
-import os
-import websocket
+import asyncio
+import websockets
 import json
-import threading
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv('API_KEY')
-CLIENT_ID = os.getenv('CLIENT_ID')
-ACCESS_TOKEN = os.getenv('REFRESH_TOKEN')
-WEBSOCKET_URL = os.getenv('WEBSOCKET_URL')
-
 class WebSocketClient:
-    def __init__(self, url=WEBSOCKET_URL):
-        self.url = url
-        self.ws = None
-        self.subscribed_channels = []
+    def __init__(self):
+        self.ws_url = os.getenv("ANGEL_ONE_WS_URL")
+        self.api_key = os.getenv("API_KEY")
+        self.access_token = os.getenv("ACCESS_TOKEN")
+        self.market_data = {}
 
-    def on_open(self, ws):
-        print("✅ WebSocket connection established")
-        self.authenticate()
+    async def connect(self):
+        async with websockets.connect(self.ws_url) as websocket:
+            await self.authenticate(websocket)
+            await self.subscribe_to_market_data(websocket)
+            await self.receive_messages(websocket)
 
-    def on_message(self, ws, message):
-        data = json.loads(message)
-        print(f"📥 Received Message: {data}")
-        
-    def on_error(self, ws, error):
-        print(f"❌ WebSocket Error: {error}")
-
-    def on_close(self, ws, close_status_code, close_msg):
-        print("❌ WebSocket connection closed")
-
-    def authenticate(self):
-        auth_payload = {
+    async def authenticate(self, websocket):
+        auth_data = {
             "action": "authenticate",
-            "api_key": API_KEY,
-            "client_id": CLIENT_ID,
-            "access_token": ACCESS_TOKEN
+            "api_key": self.api_key,
+            "access_token": self.access_token
         }
-        self.send(auth_payload)
-        
-    def subscribe(self, channels):
-        for channel in channels:
-            self.subscribed_channels.append(channel)
-            subscribe_payload = {
-                "action": "subscribe",
-                "channel": channel
-            }
-            self.send(subscribe_payload)
-        
-    def send(self, payload):
-        if self.ws:
-            self.ws.send(json.dumps(payload))
-        else:
-            print("❌ WebSocket is not connected")
+        await websocket.send(json.dumps(auth_data))
+        response = await websocket.recv()
+        print("Authentication Response:", response)
 
-    def connect(self):
-        self.ws = websocket.WebSocketApp(
-            self.url,
-            on_open=self.on_open,
-            on_message=self.on_message,
-            on_error=self.on_error,
-            on_close=self.on_close
-        )
-        self.thread = threading.Thread(target=self.ws.run_forever)
-        self.thread.start()
+    async def subscribe_to_market_data(self, websocket):
+        subscription_data = {
+            "action": "subscribe",
+            "channels": ["market-data", "order-status", "account-info"]
+        }
+        await websocket.send(json.dumps(subscription_data))
 
-    def close(self):
-        if self.ws:
-            self.ws.close()
+    async def receive_messages(self, websocket):
+        async for message in websocket:
+            data = json.loads(message)
+            self.process_message(data)
+
+    def process_message(self, data):
+        if "symbol" in data and "last_price" in data:
+            self.market_data[data["symbol"]] = data
+        elif data.get("type") == "order-status":
+            print("Order Status Update:", data)
+        elif data.get("type") == "account-info":
+            print("Account Info Update:", data)
+
+    def start(self):
+        asyncio.run(self.connect())
