@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>📊 Live Trading Dashboard</h1>
+
+    <div id="market-data">
+        <h2>Real-Time Market Data</h2>
+        <pre id="data-feed">Waiting for live data...</pre>
+    </div>
+
+    <div id="order-section">
+        <h2>Place Order</h2>
+        <input type="text" id="symbol" placeholder="Symbol (e.g., NIFTY)">
+        <input type="number" id="quantity" placeholder="Quantity">
+        <input type="number" id="price" placeholder="Price">
+        <button onclick="placeOrder()">Place Order</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+<button id="restart-btn">🔄 Restart Bot</button>
+
+<script>
+document.getElementById("restart-btn").addEventListener("click", function() {
+    fetch("/restart-bot", { method: "POST" })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .catch(error => alert("Error restarting bot!"));
+});
+</script>
+<div id="log-container" style="height: 300px; overflow-y: scroll; background: black; color: green; padding: 10px;"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+var socket = io.connect("http://your-server-ip:5001");
+
+socket.on("log_update", function(data) {
+    var logContainer = document.getElementById("log-container");
+    logContainer.innerHTML += data.log + "<br>";
+    logContainer.scrollTop = logContainer.scrollHeight;
+});
+</script>
+<button id="start-btn">▶ Start Bot</button>
+<button id="stop-btn">⛔ Stop Bot</button>
+<p id="bot-status">Checking bot status...</p>
+
+<script>
+var server_url = "http://your-server-ip:5001";
+
+function checkBotStatus() {
+    fetch(server_url + "/bot-status")
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("bot-status").innerText = data.running ? "✅ Bot is Running" : "⛔ Bot is Stopped";
+    });
+}
+
+document.getElementById("start-btn").addEventListener("click", function() {
+    fetch(server_url + "/start-bot", { method: "POST" })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .then(checkBotStatus);
+});
+
+document.getElementById("stop-btn").addEventListener("click", function() {
+    fetch(server_url + "/stop-bot", { method: "POST" })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .then(checkBotStatus);
+});
+
+setInterval(checkBotStatus, 5000);  // Auto-update status every 5 seconds
+</script>
+<h2>Bot Settings</h2>
+<form id="settings-form">
+    <label>Lot Size:</label>
+    <input type="number" id="lot_size" name="lot_size"><br><br>
+
+    <label>Max Risk:</label>
+    <input type="number" id="max_risk" name="max_risk"><br><br>
+
+    <label>Strategy:</label>
+    <select id="strategy" name="strategy">
+        <option value="mean_reversion">Mean Reversion</option>
+        <option value="momentum">Momentum</option>
+    </select><br><br>
+
+    <button type="submit">Save Settings</button>
+</form>
+
+<script>
+var server_url = "http://your-server-ip:5001";
+
+function loadSettings() {
+    fetch(server_url + "/get-settings")
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("lot_size").value = data.lot_size;
+        document.getElementById("max_risk").value = data.max_risk;
+        document.getElementById("strategy").value = data.strategy;
+    });
+}
+
+document.getElementById("settings-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    
+    var newSettings = {
+        lot_size: parseInt(document.getElementById("lot_size").value),
+        max_risk: parseInt(document.getElementById("max_risk").value),
+        strategy: document.getElementById("strategy").value
+    };
+
+    fetch(server_url + "/update-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSettings)
+    })
+    .then(response => response.json())
+    .then(data => alert(data.message));
+});
+
+loadSettings();
+</script>
