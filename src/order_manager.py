@@ -1,60 +1,70 @@
-import logging
+# order_manager.py
+
 import requests
 import json
+import time
+from utils import log_message
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+API_KEY = os.getenv('API_KEY')
+API_SECRET = os.getenv('API_SECRET')
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+API_URL = 'https://api.angelbroking.com/rest/'
 
 class OrderManager:
-    def __init__(self, api_key, access_token, base_url):
-        self.api_key = api_key
-        self.access_token = access_token
-        self.base_url = base_url
+    def __init__(self):
+        self.session = requests.Session()
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {ACCESS_TOKEN}',
+            'X-API-KEY': API_KEY
+        }
 
-    def place_order(self, order_type, symbol, quantity, price):
-        try:
-            endpoint = f'{self.base_url}/order/place'
-            headers = {
-                'Content-Type': 'application/json',
-                'X-Api-Key': self.api_key,
-                'Authorization': f'Bearer {self.access_token}'
-            }
+    def place_order(self, symbol, qty, order_type, price=None):
+        order_data = {
+            "symbol": symbol,
+            "qty": qty,
+            "order_type": order_type,
+            "price": price,
+            "strategy": "market_making"
+        }
 
-            order_data = {
-                'symbol': symbol,
-                'quantity': quantity,
-                'price': price,
-                'order_type': order_type
-            }
+        response = self.session.post(f'{API_URL}order/place', headers=self.headers, data=json.dumps(order_data))
 
-            response = requests.post(endpoint, headers=headers, data=json.dumps(order_data))
-            result = response.json()
-
-            if response.status_code == 200 and result.get('status') == 'success':
-                logging.info(f'{order_type} Order placed successfully: {result}')
-                return result
-            else:
-                logging.error(f'Failed to place order: {result}')
-                return None
-        except Exception as e:
-            logging.error(f'Error in placing order: {str(e)}')
+        if response.status_code == 200:
+            order_id = response.json().get('order_id')
+            log_message(f'Order placed successfully: {order_id}')
+            return order_id
+        else:
+            log_message(f'Failed to place order: {response.json()}')
             return None
 
-    def check_order_status(self, order_id):
-        try:
-            endpoint = f'{self.base_url}/order/status/{order_id}'
-            headers = {
-                'X-Api-Key': self.api_key,
-                'Authorization': f'Bearer {self.access_token}'
-            }
+    def cancel_order(self, order_id):
+        response = self.session.delete(f'{API_URL}order/cancel/{order_id}', headers=self.headers)
 
-            response = requests.get(endpoint, headers=headers)
-            result = response.json()
+        if response.status_code == 200:
+            log_message(f'Order cancelled successfully: {order_id}')
+        else:
+            log_message(f'Failed to cancel order: {response.json()}')
 
-            if response.status_code == 200:
-                logging.info(f'Order status retrieved successfully: {result}')
-                return result
-            else:
-                logging.error(f'Failed to retrieve order status: {result}')
-                return None
-        except Exception as e:
-            logging.error(f'Error in retrieving order status: {str(e)}')
+    def get_order_status(self, order_id):
+        response = self.session.get(f'{API_URL}order/status/{order_id}', headers=self.headers)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            log_message(f'Failed to get order status: {response.json()}')
             return None
-            
+
+
+if __name__ == "__main__":
+    manager = OrderManager()
+    order_id = manager.place_order('NIFTY', 10, 'BUY')
+    time.sleep(2)
+    if order_id:
+        status = manager.get_order_status(order_id)
+        log_message(f'Order Status: {status}')
+        manager.cancel_order(order_id)
