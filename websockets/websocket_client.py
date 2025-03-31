@@ -1,53 +1,67 @@
-import asyncio
-import websockets
+# websocket_client.py
+
+import websocket
 import json
-import os
+import threading
+import time
+from utils import log_message
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
 class WebSocketClient:
     def __init__(self):
-        self.ws_url = os.getenv("ANGEL_ONE_WS_URL")
         self.api_key = os.getenv("API_KEY")
         self.access_token = os.getenv("ACCESS_TOKEN")
-        self.market_data = {}
+        self.ws_url = os.getenv("WEBSOCKET_URL")  # Replace with Angel One WebSocket URL
+        self.ws = None
+        self.connected = False
 
-    async def connect(self):
-        async with websockets.connect(self.ws_url) as websocket:
-            await self.authenticate(websocket)
-            await self.subscribe_to_market_data(websocket)
-            await self.receive_messages(websocket)
+    def on_message(self, ws, message):
+        data = json.loads(message)
+        log_message(f"Message received: {data}")
+        # Handle incoming messages here (e.g., market data, order updates)
 
-    async def authenticate(self, websocket):
-        auth_data = {
-            "action": "authenticate",
-            "api_key": self.api_key,
-            "access_token": self.access_token
-        }
-        await websocket.send(json.dumps(auth_data))
-        response = await websocket.recv()
-        print("Authentication Response:", response)
+    def on_error(self, ws, error):
+        log_message(f"WebSocket error: {error}")
 
-    async def subscribe_to_market_data(self, websocket):
-        subscription_data = {
+    def on_close(self, ws, close_status_code, close_msg):
+        log_message(f"WebSocket closed: {close_status_code} - {close_msg}")
+        self.connected = False
+
+    def on_open(self, ws):
+        log_message("WebSocket connection established")
+        self.connected = True
+        # Subscribe to relevant channels (e.g., market data, order status, account info)
+        subscription_message = json.dumps({
             "action": "subscribe",
             "channels": ["market-data", "order-status", "account-info"]
-        }
-        await websocket.send(json.dumps(subscription_data))
+        })
+        ws.send(subscription_message)
 
-    async def receive_messages(self, websocket):
-        async for message in websocket:
-            data = json.loads(message)
-            self.process_message(data)
+    def connect(self):
+        self.ws = websocket.WebSocketApp(
+            self.ws_url,
+            on_open=self.on_open,
+            on_message=self.on_message,
+            on_error=self.on_error,
+            on_close=self.on_close
+        )
 
-    def process_message(self, data):
-        if "symbol" in data and "last_price" in data:
-            self.market_data[data["symbol"]] = data
-        elif data.get("type") == "order-status":
-            print("Order Status Update:", data)
-        elif data.get("type") == "account-info":
-            print("Account Info Update:", data)
+        threading.Thread(target=self.ws.run_forever).start()
 
-    def start(self):
-        asyncio.run(self.connect())
+        while not self.connected:
+            time.sleep(0.1)
+
+    def disconnect(self):
+        if self.ws:
+            self.ws.close()
+            self.connected = False
+
+
+if __name__ == "__main__":
+    client = WebSocketClient()
+    client.connect()
+    time.sleep(5)  # Keep the connection alive for testing
+    client.disconnect()
