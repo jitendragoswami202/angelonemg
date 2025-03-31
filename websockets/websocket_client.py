@@ -1,55 +1,71 @@
+import os
 import websocket
 import json
-import logging
+import threading
+from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+load_dotenv()
 
+API_KEY = os.getenv('API_KEY')
+CLIENT_ID = os.getenv('CLIENT_ID')
+ACCESS_TOKEN = os.getenv('REFRESH_TOKEN')
+WEBSOCKET_URL = os.getenv('WEBSOCKET_URL')
 
 class WebSocketClient:
-    def __init__(self, ws_url, feed_token, api_key):
-        self.ws_url = ws_url
-        self.feed_token = feed_token
-        self.api_key = api_key
+    def __init__(self, url=WEBSOCKET_URL):
+        self.url = url
         self.ws = None
-
-    def on_message(self, ws, message):
-        try:
-            data = json.loads(message)
-            logging.info(f'Received Message: {data}')
-        except json.JSONDecodeError as e:
-            logging.error(f'Error decoding message: {str(e)}')
-
-    def on_error(self, ws, error):
-        logging.error(f'WebSocket error: {str(error)}')
-
-    def on_close(self, ws, close_status_code, close_msg):
-        logging.info('WebSocket connection closed.')
+        self.subscribed_channels = []
 
     def on_open(self, ws):
-        logging.info('WebSocket connection opened.')
+        print("✅ WebSocket connection established")
+        self.authenticate()
+
+    def on_message(self, ws, message):
+        data = json.loads(message)
+        print(f"📥 Received Message: {data}")
+        
+    def on_error(self, ws, error):
+        print(f"❌ WebSocket Error: {error}")
+
+    def on_close(self, ws, close_status_code, close_msg):
+        print("❌ WebSocket connection closed")
+
+    def authenticate(self):
         auth_payload = {
-            'action': 'authenticate',
-            'api_key': self.api_key,
-            'feed_token': self.feed_token
+            "action": "authenticate",
+            "api_key": API_KEY,
+            "client_id": CLIENT_ID,
+            "access_token": ACCESS_TOKEN
         }
-        ws.send(json.dumps(auth_payload))
+        self.send(auth_payload)
+        
+    def subscribe(self, channels):
+        for channel in channels:
+            self.subscribed_channels.append(channel)
+            subscribe_payload = {
+                "action": "subscribe",
+                "channel": channel
+            }
+            self.send(subscribe_payload)
+        
+    def send(self, payload):
+        if self.ws:
+            self.ws.send(json.dumps(payload))
+        else:
+            print("❌ WebSocket is not connected")
 
     def connect(self):
         self.ws = websocket.WebSocketApp(
-            self.ws_url,
+            self.url,
             on_open=self.on_open,
             on_message=self.on_message,
             on_error=self.on_error,
             on_close=self.on_close
         )
-        self.ws.run_forever()
+        self.thread = threading.Thread(target=self.ws.run_forever)
+        self.thread.start()
 
-
-if __name__ == "__main__":
-    ws_client = WebSocketClient(
-        ws_url="wss://ws.angelbroking.com",  # Replace with your WS URL
-        feed_token="YOUR_FEED_TOKEN",
-        api_key="YOUR_API_KEY"
-    )
-    ws_client.connect()
-    
+    def close(self):
+        if self.ws:
+            self.ws.close()
