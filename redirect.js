@@ -1,54 +1,29 @@
-// redirect.js (Callback Handler)
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Redirect = () => {
-  const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    // Get the URL parameters from the query string
-    const queryParams = new URLSearchParams(window.location.search);
-    const authCode = queryParams.get('code');
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
 
-    if (authCode) {
-      // Send authorization code to backend to exchange for tokens
-      fetchTokens(authCode);
-    } else {
-      setMessage('Authorization code not found.');
-    }
-  }, []);
+        if (accessToken && refreshToken) {
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
+            navigate('/dashboard');
+        } else {
+            alert('Authentication failed. Please try again.');
+            navigate('/login');
+        }
+    }, [navigate]);
 
-  // Function to fetch tokens from your backend
-  const fetchTokens = async (authCode) => {
-    try {
-      const response = await fetch('https://your-backend-server.com/exchange-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code: authCode }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMessage('Tokens obtained successfully!');
-        // Optionally store the tokens in localStorage/sessionStorage or redirect the user
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-      } else {
-        setMessage('Failed to exchange code for tokens.');
-      }
-    } catch (error) {
-      console.error('Error fetching tokens:', error);
-      setMessage('Error during token exchange.');
-    }
-  };
-
-  return (
-    <div>
-      <h1>Redirecting...</h1>
-      <p>{message}</p>
-    </div>
-  );
+    return (
+        <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
+            <h1>Redirecting...</h1>
+        </div>
+    );
 };
 
 export default Redirect;
