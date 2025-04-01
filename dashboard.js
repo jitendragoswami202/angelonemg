@@ -1,45 +1,57 @@
-// Dashboard.js (Dashboard Component)
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { io } from 'socket.io-client';
 
-import React, { useState, useEffect } from 'react';
+const Dashboard = () => {
+    const [marketData, setMarketData] = useState([]);
+    const [connected, setConnected] = useState(false);
 
-const Dashboard = ({ accessToken }) => {
-  const [accountData, setAccountData] = useState(null);
-  const [error, setError] = useState('');
+    useEffect(() => {
+        const socket = io('http://localhost:5000');
 
-  useEffect(() => {
-    const fetchAccountData = async () => {
-      try {
-        const response = await fetch('https://your-backend-server.com/account-data', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
+        socket.on('connect', () => {
+            setConnected(true);
+            console.log('Connected to WebSocket server');
         });
 
-        const data = await response.json();
-        setAccountData(data);
-      } catch (err) {
-        setError('Failed to fetch account data');
-        console.error(err);
-      }
-    };
+        socket.on('disconnect', () => {
+            setConnected(false);
+            console.log('Disconnected from WebSocket server');
+        });
 
-    if (accessToken) {
-      fetchAccountData();
-    }
-  }, [accessToken]);
+        socket.on('market_data', (data) => {
+            setMarketData(data);
+        });
 
-  return (
-    <div>
-      <h1>Account Data</h1>
-      {error && <p>{error}</p>}
-      {accountData ? (
-        <pre>{JSON.stringify(accountData, null, 2)}</pre>
-      ) : (
-        <p>Loading account data...</p>
-      )}
-    </div>
-  );
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
+
+    return (
+        <div className="p-6 space-y-6">
+            <Card className="bg-gray-900 text-white">
+                <CardContent>
+                    <h1 className="text-2xl font-bold">Trading Dashboard</h1>
+                    <p>Status: {connected ? 'Connected' : 'Disconnected'}</p>
+                </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+                {marketData.map((item, index) => (
+                    <Card key={index} className="bg-gray-800 text-white p-4">
+                        <CardContent>
+                            <p>{item.symbol}: {item.price}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white">Start Bot</Button>
+            <Button className="bg-red-500 hover:bg-red-600 text-white">Stop Bot</Button>
+        </div>
+    );
 };
 
 export default Dashboard;
