@@ -1,78 +1,54 @@
-# trade_executor.py
-
+# trade_executor.py - Trade Execution Logic
 import requests
 import json
 import time
-from utils import log_message
+import logging
+from auth import Auth
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 class TradeExecutor:
     def __init__(self):
-        self.api_key = os.getenv("API_KEY")
-        self.access_token = os.getenv("ACCESS_TOKEN")
-        self.api_url = "https://api.angelone.in"
+        self.auth = Auth()
+        self.auth.load_tokens()
+        self.access_token = self.auth.access_token
+        self.base_url = os.getenv('BASE_URL')
+        self.api_key = os.getenv('API_KEY')
 
-    def place_order(self, symbol, qty, order_type, price=None):
-        order_data = {
-            "symbol": symbol,
-            "qty": qty,
-            "order_type": order_type,
-            "price": price,
-            "api_key": self.api_key,
-            "access_token": self.access_token
+    def execute_trade(self, symbol, quantity, order_type):
+        endpoint = f'{self.base_url}/placeOrder'
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
         }
 
-        response = requests.post(f"{self.api_url}/orders", json=order_data)
+        order_data = {
+            "symbol": symbol,
+            "quantity": quantity,
+            "order_type": order_type,
+            "api_key": self.api_key
+        }
 
-        if response.status_code == 200:
-            log_message(f"Order placed successfully: {response.json()}")
-            return response.json()
-        else:
-            log_message(f"Order placement failed: {response.text}")
+        try:
+            response = requests.post(endpoint, headers=headers, data=json.dumps(order_data))
+            if response.status_code == 200:
+                logging.info(f"Trade Executed Successfully: {response.json()}")
+                return response.json()
+            else:
+                logging.error(f"Trade Execution Failed: {response.status_code} - {response.text}")
+                return None
+        except Exception as e:
+            logging.error(f"Error Executing Trade: {str(e)}")
             return None
-
-    def cancel_order(self, order_id):
-        response = requests.delete(f"{self.api_url}/orders/{order_id}", headers={
-            "api_key": self.api_key,
-            "access_token": self.access_token
-        })
-
-        if response.status_code == 200:
-            log_message(f"Order cancelled successfully: {response.json()}")
-        else:
-            log_message(f"Order cancellation failed: {response.text}")
-
-    def get_positions(self):
-        response = requests.get(f"{self.api_url}/positions", headers={
-            "api_key": self.api_key,
-            "access_token": self.access_token
-        })
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            log_message(f"Failed to fetch positions: {response.text}")
-            return []
-
-    def get_open_orders(self):
-        response = requests.get(f"{self.api_url}/orders", headers={
-            "api_key": self.api_key,
-            "access_token": self.access_token
-        })
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            log_message(f"Failed to fetch open orders: {response.text}")
-            return []
-
 
 if __name__ == "__main__":
     executor = TradeExecutor()
-    positions = executor.get_positions()
-    log_message(f"Positions: {positions}")
-    orders = executor.get_open_orders()
-    log_message(f"Open Orders: {orders}")
+
+    while True:
+        # Replace with your trading logic and symbols
+        executor.execute_trade(symbol="NIFTY22JUL20000CE", quantity=1, order_type="BUY")
+        time.sleep(1)
