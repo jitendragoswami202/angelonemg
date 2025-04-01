@@ -1,57 +1,22 @@
-# auto_token_generator.py
-
-import requests
+# auto_token_generator.py - Automating Token Refresh
+import time
 import json
-import os
-from dotenv import load_dotenv
-from utils import log_message
+from auth import Auth
 
-load_dotenv()
+auth = Auth()
+auth.load_tokens()  # Load existing tokens if available
 
-API_KEY = os.getenv('API_KEY')
-CLIENT_CODE = os.getenv('CLIENT_CODE')
-PASSWORD = os.getenv('PASSWORD')
-TOTP_SECRET = os.getenv('TOTP_SECRET')
-BASE_URL = os.getenv('BASE_URL')
+REFRESH_INTERVAL = 3600  # Refresh token every 1 hour (adjust as needed)
 
-
-def generate_totp(secret):
-    import pyotp
-    totp = pyotp.TOTP(secret)
-    return totp.now()
-
-def generate_access_token():
-    totp = generate_totp(TOTP_SECRET)
-    url = f"{BASE_URL}/login"
-    payload = {
-        "api_key": API_KEY,
-        "client_code": CLIENT_CODE,
-        "password": PASSWORD,
-        "totp": totp
-    }
-    headers = {
-        'Content-Type': 'application/json'
-    }
+while True:
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        if response.status_code == 200:
-            result = response.json()
-            access_token = result.get('data', {}).get('access_token')
-            if access_token:
-                log_message("Access token generated successfully.")
-                return access_token
-            else:
-                log_message("Failed to retrieve access token from response.")
+        new_access_token = auth.refresh_access_token()
+        if new_access_token:
+            print(f"New Access Token: {new_access_token}")
         else:
-            log_message(f"Failed to generate access token: {response.status_code} {response.text}")
+            print("Failed to refresh access token. Trying again in 5 minutes.")
+
+        time.sleep(REFRESH_INTERVAL)
     except Exception as e:
-        log_message(f"Error generating access token: {e}")
-    return None
-
-
-if __name__ == "__main__":
-    token = generate_access_token()
-    if token:
-        log_message(f"Access Token: {token}")
-    else:
-        log_message("Failed to generate access token.")
+        print(f"Error in auto_token_generator: {str(e)}")
+        time.sleep(300)  # Retry after 5 minutes if an error occurs
