@@ -1,69 +1,65 @@
-# enhanced_market_making_strategy.py
-
+# strategy.py - Smart Money Strategy Implementation
+import logging
+from trade_executor import TradeExecutor
+from websocket_client import WebSocketClient
+import threading
 import time
-import numpy as np
-from datetime import datetime
-from websocket_manager import WebSocketManager  # Assuming you have websocket_manager.py set up
-from trade_executor import TradeExecutor  # Assuming you have trade_executor.py set up
-from utils import log_message  # Assuming you have a logging utility
 
-class EnhancedMarketMaker:
-    def __init__(self, executor, symbol, spread=0.01, max_drawdown=5, max_position_size=100, hedge=True):
-        self.executor = executor
-        self.symbol = symbol
-        self.spread = spread  # Initial spread percentage
-        self.max_drawdown = max_drawdown
-        self.max_position_size = max_position_size
-        self.hedge = hedge
-        self.inventory = 0
-        self.open_orders = {}
-        self.trade_frequency = 5  # Target: 5 trades per second
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def calculate_dynamic_spread(self, volatility):
-        # Increase spread during high volatility to reduce risk
-        return self.spread * (1 + volatility)
+class Strategy:
+    def __init__(self):
+        self.executor = TradeExecutor()
+        self.ws_client = WebSocketClient()
+        self.trade_threshold = 0.01  # Target profit of 1%
+        self.max_loss = 0.02  # Maximum loss of 2%
+        self.position = None
+        self.last_price = None
+        self.balance = 100000  # Initial trading balance
 
-    def manage_inventory(self):
-        # Prevent excessive long or short positions
-        if self.inventory > self.max_position_size:
-            self.executor.place_order(self.symbol, 'sell', 'market', abs(self.inventory))
-            self.inventory = 0
-        elif self.inventory < -self.max_position_size:
-            self.executor.place_order(self.symbol, 'buy', 'market', abs(self.inventory))
-            self.inventory = 0
+    def on_market_data(self, data):
+        symbol = data.get('symbol')
+        price = float(data.get('price'))
 
-    def cancel_stale_orders(self):
-        # Cancel orders that are too old
-        now = datetime.now()
-        stale_orders = [order_id for order_id, order in self.open_orders.items() if (now - order['timestamp']).seconds > 5]
-        for order_id in stale_orders:
-            self.executor.cancel_order(order_id)
-            del self.open_orders[order_id]
+        if self.position is None:
+            if self.last_price and (price - self.last_price) / self.last_price >= self.trade_threshold:
+                self.open_position(symbol, price)
+        else:
+            if (self.position['type'] == 'BUY' and (price - self.position['entry_price']) / self.position['entry_price'] >= self.trade_threshold) or \
+               (self.position['type'] == 'SELL' and (self.position['entry_price'] - price) / self.position['entry_price'] >= self.trade_threshold):
+                self.close_position(symbol, price)
 
-    def place_market_making_orders(self, market_price, volatility):
-        dynamic_spread = self.calculate_dynamic_spread(volatility)
-        bid_price = market_price * (1 - dynamic_spread)
-        ask_price = market_price * (1 + dynamic_spread)
+            if (self.position['type'] == 'BUY' and (self.position['entry_price'] - price) / self.position['entry_price'] >= self.max_loss) or \
+               (self.position['type'] == 'SELL' and (price - self.position['entry_price']) / self.position['entry_price'] >= self.max_loss):
+                self.close_position(symbol, price, stop_loss=True)
 
-        bid_order_id = self.executor.place_order(self.symbol, 'buy', 'limit', 1, price=bid_price)
-        ask_order_id = self.executor.place_order(self.symbol, 'sell', 'limit', 1, price=ask_price)
+        self.last_price = price
 
-        self.open_orders[bid_order_id] = {'type': 'buy', 'timestamp': datetime.now()}
-        self.open_orders[ask_order_id] = {'type': 'sell', 'timestamp': datetime.now()}
+    def open_position(self, symbol, price):
+        self.position = {
+            'symbol': symbol,
+            'entry_price': price,
+            'type': 'BUY',
+            'quantity': 1
+        }
+        logging.info(f"Opening Position: {self.position}")
+        self.executor.execute_trade(symbol, 1, 'BUY')
 
-    def run(self):
-        while True:
-            try:
-                market_price, volatility = self.executor.get_market_data(self.symbol)
-                self.place_market_making_orders(market_price, volatility)
-                self.cancel_stale_orders()
-                self.manage_inventory()
-                time.sleep(1 / self.trade_frequency)
-            except Exception as e:
-                log_message(f"Error: {str(e)}")
+    def close_position(self, symbol, price, stop_loss=False):
+        logging.info(f"Closing Position at {price} - {'Stop Loss Triggered' if stop_loss else 'Target Achieved'}")
+        self.executor.execute_trade(symbol, 1, 'SELL')
+        self.position = None
 
+    def start(self):
+        threading.Thread(target=self.ws_client.start).start()
+        self.ws_client.ws.on_message = lambda ws, message: self.on_market_data(message)
 
 if __name__ == "__main__":
-    executor = TradeExecutor()  # Replace with your actual executor instance
-    market_maker = EnhancedMarketMaker(executor, symbol="NIFTY")
-    market_maker.run()
+    strategy = Strategy()
+    strategy.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Strategy Stopped")
