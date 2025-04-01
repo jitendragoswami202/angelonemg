@@ -1,67 +1,74 @@
-# websocket_client.py
-
+# websocket_client.py - WebSocket Communication
 import websocket
 import json
 import threading
 import time
-from utils import log_message
+from auth import Auth
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
+WEBSOCKET_URL = os.getenv('WEBSOCKET_URL')
+
 class WebSocketClient:
     def __init__(self):
-        self.api_key = os.getenv("API_KEY")
-        self.access_token = os.getenv("ACCESS_TOKEN")
-        self.ws_url = os.getenv("WEBSOCKET_URL")  # Replace with Angel One WebSocket URL
+        self.auth = Auth()
+        self.auth.load_tokens()
+        self.access_token = self.auth.access_token
         self.ws = None
         self.connected = False
 
     def on_message(self, ws, message):
         data = json.loads(message)
-        log_message(f"Message received: {data}")
-        # Handle incoming messages here (e.g., market data, order updates)
+        print(f"Received Message: {data}")
 
     def on_error(self, ws, error):
-        log_message(f"WebSocket error: {error}")
+        print(f"WebSocket Error: {error}")
 
     def on_close(self, ws, close_status_code, close_msg):
-        log_message(f"WebSocket closed: {close_status_code} - {close_msg}")
+        print("WebSocket Closed")
         self.connected = False
 
     def on_open(self, ws):
-        log_message("WebSocket connection established")
+        print("WebSocket Connection Established")
         self.connected = True
-        # Subscribe to relevant channels (e.g., market data, order status, account info)
-        subscription_message = json.dumps({
+
+        # Example subscription message
+        subscribe_message = {
             "action": "subscribe",
-            "channels": ["market-data", "order-status", "account-info"]
-        })
-        ws.send(subscription_message)
+            "key": self.access_token,
+            "feed": "nse_cm"
+        }
+
+        self.ws.send(json.dumps(subscribe_message))
 
     def connect(self):
         self.ws = websocket.WebSocketApp(
-            self.ws_url,
+            WEBSOCKET_URL,
             on_open=self.on_open,
             on_message=self.on_message,
             on_error=self.on_error,
-            on_close=self.on_close
+            on_close=self.on_close,
+            header={"Authorization": f"Bearer {self.access_token}"}
         )
 
-        threading.Thread(target=self.ws.run_forever).start()
+        self.ws.run_forever()
 
-        while not self.connected:
-            time.sleep(0.1)
+    def start(self):
+        threading.Thread(target=self.connect).start()
 
-    def disconnect(self):
+    def stop(self):
         if self.ws:
             self.ws.close()
-            self.connected = False
-
 
 if __name__ == "__main__":
     client = WebSocketClient()
-    client.connect()
-    time.sleep(5)  # Keep the connection alive for testing
-    client.disconnect()
+    client.start()
+
+    while True:
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            client.stop()
+            break
