@@ -1,57 +1,167 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { io } from 'socket.io-client';
+import React, { useState, useEffect } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
+import axios from 'axios';
 
-const Dashboard = () => {
-    const [marketData, setMarketData] = useState([]);
-    const [connected, setConnected] = useState(false);
+// Global Styles for Dark/Light Mode
+const GlobalStyle = createGlobalStyle`
+  body {
+    background-color: ${(props) => (props.darkMode ? '#121212' : '#f5f5f5')};
+    color: ${(props) => (props.darkMode ? '#e0e0e0' : '#333')};
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+  }
+`;
 
-    useEffect(() => {
-        const socket = io('http://localhost:5000');
+// Styled components for the dashboard layout
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+`;
 
-        socket.on('connect', () => {
-            setConnected(true);
-            console.log('Connected to WebSocket server');
-        });
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+`;
 
-        socket.on('disconnect', () => {
-            setConnected(false);
-            console.log('Disconnected from WebSocket server');
-        });
+const ModeButton = styled.button`
+  background-color: ${(props) => (props.darkMode ? '#444' : '#ccc')};
+  color: ${(props) => (props.darkMode ? '#fff' : '#000')};
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+`;
 
-        socket.on('market_data', (data) => {
-            setMarketData(data);
-        });
+const DashboardSection = styled.div`
+  margin: 20px 0;
+  padding: 10px;
+  background-color: ${(props) => (props.darkMode ? '#333' : '#fff')};
+  border-radius: 10px;
+  box-shadow: ${(props) => (props.darkMode ? '0 0 10px rgba(0,0,0,0.5)' : '0 0 10px rgba(0,0,0,0.1)')};
+`;
 
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
+const Button = styled.button`
+  padding: 10px;
+  margin: 10px 0;
+  background-color: ${(props) => (props.darkMode ? '#1a73e8' : '#4caf50')};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`;
 
-    return (
-        <div className="p-6 space-y-6">
-            <Card className="bg-gray-900 text-white">
-                <CardContent>
-                    <h1 className="text-2xl font-bold">Trading Dashboard</h1>
-                    <p>Status: {connected ? 'Connected' : 'Disconnected'}</p>
-                </CardContent>
-            </Card>
+const DataItem = styled.div`
+  margin: 10px 0;
+`;
 
-            <div className="grid grid-cols-2 gap-4">
-                {marketData.map((item, index) => (
-                    <Card key={index} className="bg-gray-800 text-white p-4">
-                        <CardContent>
-                            <p>{item.symbol}: {item.price}</p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+const TradingDashboard = () => {
+  const [darkMode, setDarkMode] = useState(true);
+  const [funds, setFunds] = useState(0);
+  const [pnl, setPnl] = useState(0);
+  const [openPositions, setOpenPositions] = useState([]);
+  const [openOrders, setOpenOrders] = useState([]);
+  const [isBotRunning, setIsBotRunning] = useState(false);
 
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white">Start Bot</Button>
-            <Button className="bg-red-500 hover:bg-red-600 text-white">Stop Bot</Button>
-        </div>
-    );
+  useEffect(() => {
+    // Fetch funds, P&L, open positions, and open orders from the backend/API
+    const fetchData = async () => {
+      try {
+        const fundsResponse = await axios.get('/api/funds');
+        const pnlResponse = await axios.get('/api/pnl');
+        const positionsResponse = await axios.get('/api/open-positions');
+        const ordersResponse = await axios.get('/api/open-orders');
+        
+        setFunds(fundsResponse.data.funds);
+        setPnl(pnlResponse.data.pnl);
+        setOpenPositions(positionsResponse.data.positions);
+        setOpenOrders(ordersResponse.data.orders);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [isBotRunning]);
+
+  const handleModeToggle = () => {
+    setDarkMode((prevMode) => !prevMode);
+  };
+
+  const handleStartBot = () => {
+    // Start the trading bot via API or backend integration
+    setIsBotRunning(true);
+  };
+
+  const handleStopBot = () => {
+    // Stop the trading bot via API or backend integration
+    setIsBotRunning(false);
+  };
+
+  const handleExitPosition = (positionId) => {
+    // Handle position exit logic via API or backend integration
+    console.log(`Exiting position: ${positionId}`);
+  };
+
+  return (
+    <>
+      <GlobalStyle darkMode={darkMode} />
+      <Container>
+        <Header>
+          <div>Trading Dashboard</div>
+          <ModeButton darkMode={darkMode} onClick={handleModeToggle}>
+            {darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          </ModeButton>
+        </Header>
+        
+        <DashboardSection darkMode={darkMode}>
+          <h3>Available Funds</h3>
+          <DataItem>₹ {funds}</DataItem>
+        </DashboardSection>
+        
+        <DashboardSection darkMode={darkMode}>
+          <h3>Total P&L</h3>
+          <DataItem>₹ {pnl}</DataItem>
+        </DashboardSection>
+
+        <DashboardSection darkMode={darkMode}>
+          <h3>Open Positions</h3>
+          {openPositions.length > 0 ? (
+            openPositions.map((position) => (
+              <div key={position.id}>
+                <DataItem>
+                  {position.name} | {position.quantity} | 
+                  <Button darkMode={darkMode} onClick={() => handleExitPosition(position.id)}>Exit Position</Button>
+                </DataItem>
+              </div>
+            ))
+          ) : (
+            <DataItem>No open positions.</DataItem>
+          )}
+        </DashboardSection>
+
+        <DashboardSection darkMode={darkMode}>
+          <h3>Open Orders</h3>
+          {openOrders.length > 0 ? (
+            openOrders.map((order) => (
+              <DataItem key={order.id}>
+                {order.symbol} | {order.quantity} | {order.status}
+              </DataItem>
+            ))
+          ) : (
+            <DataItem>No open orders.</DataItem>
+          )}
+        </DashboardSection>
+
+        <Button darkMode={darkMode} onClick={isBotRunning ? handleStopBot : handleStartBot}>
+          {isBotRunning ? 'Stop Bot' : 'Start Bot'}
+        </Button>
+      </Container>
+    </>
+  );
 };
 
-export default Dashboard;
+export default TradingDashboard;
