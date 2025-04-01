@@ -1,24 +1,20 @@
 {
   "name": "trading-dashboard",
   "version": "1.0.0",
-  "description": "A trading dashboard using React",
-  "main": "index.js",
+  "description": "A trading dashboard for algorithmic trading using WebSockets",
+  "main": "src/index.jsx",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open",
-    "build": "webpack --mode production"
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
   },
   "dependencies": {
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-scripts": "^4.0.0",
+    "parcel": "^2.0.0",
+    "react-icons": "^4.2.0"
   },
-  "devDependencies": {
-    "webpack": "^5.0.0",
-    "webpack-cli": "^4.0.0",
-    "webpack-dev-server": "^4.0.0",
-    "babel-loader": "^8.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/preset-react": "^7.0.0"
-  },
-  "author": "Jitendragoswami202",
-  "license": "ISC"
+  "devDependencies": {},
+  "author": "Your Name",
+  "license": "MIT"
 }
