@@ -15,7 +15,7 @@ class AngelOneAuth:
     def generate_access_token(self, request_token):
         try:
             logging.info('Generating access token...')
-            url = 'https://api.angelbroking.com/rest/authenticate'
+            url ='https://smartapi.angelbroking.com/v1.0/session/authenticate'
             payload = {
                 'api_key': self.api_key,
                 'api_secret': self.api_secret,
