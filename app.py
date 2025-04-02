@@ -1,11 +1,11 @@
 from flask import Flask, jsonify
-import os
 from dotenv import load_dotenv
-
-app = Flask(__name__)
+import os
 
 # Load environment variables from .env file
 load_dotenv()
+
+app = Flask(__name__)
 
 @app.route('/get_credentials', methods=['GET'])
 def get_credentials():
