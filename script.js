@@ -1,5 +1,5 @@
 // Connect to WebSocket for live data
-const ws = new WebSocket("wss://websocket-feed-url");
+const ws = new WebSocket("wss://smartapisocket.angelbroking.com/ws");
 
 ws.onmessage = function(event) {
     document.getElementById("data-feed").innerText = event.data;
