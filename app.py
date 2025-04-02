@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
-from dotenv import load_dotenv
-import os
+from flask import Flask, jsonify  # This is one import line
+from dotenv import load_dotenv  # This is another import line
+import os  # This is another import line
 
 # Load environment variables from .env file
 load_dotenv()
