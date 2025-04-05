@@ -94,6 +94,6 @@ if __name__ == "__main__":
     auth_url = auth.generate_auth_url()
     print(f"Visit this URL to authorize the application: {auth_url}")
 
-    # After authorization, get the auth code and generate access token
+    
     auth_code = input("Enter the authorization code: ")
     auth.generate_access_token(auth_code)
