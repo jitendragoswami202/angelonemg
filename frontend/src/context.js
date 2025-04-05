@@ -1,4 +1,3 @@
-// frontend/src/context.js
 import React, { createContext, useState, useEffect } from 'react';
 import { connectSocket } from './services/websocket';
 
