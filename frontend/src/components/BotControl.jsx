@@ -1,4 +1,3 @@
-// frontend/src/components/BotControl.jsx
 import React, { useState, useContext } from 'react';
 import { Button, TextField, Paper, Typography } from '@mui/material';
 import { AppContext } from '../context';
