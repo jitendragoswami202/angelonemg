@@ -94,12 +94,12 @@ def place_order(access_token, symbol, qty, order_type="MARKET", transaction_type
 
 # Main Execution
 if __name__ == "__main__":
-    # Generate Access Token
+    
     access_token = generate_access_token()
 
     if access_token:
-        # Connect to WebSocket
+        
         connect_websocket(access_token)
 
-        # Example: Place an order (You can replace with your strategy logic)
+        
         place_order(access_token, "NIFTY23MAYFUT", qty=1)
