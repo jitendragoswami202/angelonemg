@@ -1,4 +1,3 @@
-// frontend/src/services/websocket.js
 import { io } from 'socket.io-client';
 
 const socket = io('http://your-backend-server-url'); // Replace with your backend URL
