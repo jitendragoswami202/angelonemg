@@ -1,4 +1,3 @@
-// frontend/src/components/PnLDisplay.jsx
 import React, { useContext } from 'react';
 import { Paper, Typography, Grid } from '@mui/material';
 import { AppContext } from '../context';
