@@ -1,4 +1,3 @@
-// frontend/src/components/OpenOrder.jsx
 import React, { useContext, useState } from 'react';
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, TextField } from '@mui/material';
 import { AppContext } from '../context';
