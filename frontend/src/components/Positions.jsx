@@ -1,4 +1,3 @@
-// frontend/src/components/Positions.jsx
 import React, { useContext } from 'react';
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { AppContext } from '../context';
