@@ -1,4 +1,3 @@
-// frontend/src/components/MarketDataWidget.jsx
 import React, { useContext } from 'react';
 import { Paper, Typography } from '@mui/material';
 import { AppContext } from '../context';
