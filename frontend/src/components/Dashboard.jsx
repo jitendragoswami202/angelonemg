@@ -1,4 +1,3 @@
-// frontend/src/components/Dashboard.jsx
 import React, { useContext } from 'react';
 import MarketDataWidget from './MarketDataWidget';
 import Positions from './Positions';
