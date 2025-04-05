@@ -4,17 +4,15 @@
   "description": "A trading dashboard for algorithmic trading using WebSockets",
   "main": "src/index.jsx",
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "start": "parcel frontend/index.html",
+    "build": "parcel build frontend/index.html --dist-dir dist"
   },
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-scripts": "^4.0.0",
-    "parcel": "^2.0.0",
-    "react-icons": "^4.2.0"
+    "react-icons": "^4.2.0",
+    "parcel": "^2.0.0"
   },
-  "devDependencies": {},
   "author": "Your Name",
   "license": "MIT"
 }
