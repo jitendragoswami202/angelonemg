@@ -1,0 +1,1 @@
+// MarketDataWidget.jsx placeholder

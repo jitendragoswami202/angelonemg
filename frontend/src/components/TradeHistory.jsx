@@ -1,0 +1,1 @@
+// TradeHistory.jsx placeholder

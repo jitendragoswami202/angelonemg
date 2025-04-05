@@ -1,0 +1,1 @@
+// FundsInfo.jsx placeholder
