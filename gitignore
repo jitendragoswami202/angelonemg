@@ -1,0 +1,32 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Environment Variables
+.env
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# Webpack
+*.bundle.js
+*.map
+
+# System Files
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Netlify
+.netlify/
+
+# Testing / Coverage
+coverage/
+*.cover
+*.lcov
