@@ -3,9 +3,9 @@ import json
 from auth import Auth
 
 auth = Auth()
-auth.load_tokens()  # Load existing tokens if available
+auth.load_tokens() 
 
-REFRESH_INTERVAL = 3600  # Refresh token every 1 hour (adjust as needed)
+REFRESH_INTERVAL = 3600  
 
 while True:
     try:
@@ -18,4 +18,4 @@ while True:
         time.sleep(REFRESH_INTERVAL)
     except Exception as e:
         print(f"Error in auto_token_generator: {str(e)}")
-        time.sleep(300)  # Retry after 5 minutes if an error occurs
+        time.sleep(300)  
