@@ -1,9 +1,7 @@
 [build]
   base = "frontend"
-  publish = "dist"
-  command = "npm install && npm run build"
+  publish = "frontend/dist"
+  command = "npm run build"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[dev]
+  framework = "react"
