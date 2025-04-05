@@ -1,4 +1,3 @@
-# auth.py - Handling Authentication & Token Generation
 import requests
 import os
 import json
