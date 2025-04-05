@@ -1,4 +1,3 @@
-// frontend/src/services/api.js
 const API_URL = 'http://your-backend-server-url/api'; // Replace with your backend API URL
 
 export const sendBotCommand = async (command) => {
