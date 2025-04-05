@@ -1,4 +1,3 @@
-# auto_token_generator.py - Automating Token Refresh
 import time
 import json
 from auth import Auth
