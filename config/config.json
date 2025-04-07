@@ -1,5 +1,0 @@
-{
-    "lot_size": 1,
-    "max_risk": 5000,
-    "strategy": "mean_reversion"
-}
