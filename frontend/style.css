@@ -73,3 +73,45 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+.market-widget {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.market-widget h2 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+}
+
+.market-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.market-table th,
+.market-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.market-table th {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.market-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.market-table .positive {
+  color: green;
+}
+
+.market-table .negative {
+  color: red;
+}
