@@ -1,24 +1,28 @@
 import React, { createContext, useContext, useState } from 'react';
+import { themes } from './theme';
 
-// Create the context
 const AppContext = createContext();
 
-// Provider component
 export const AppProvider = ({ children }) => {
   const [symbol, setSymbol] = useState('BINANCE:BTCUSDT');
   const [botRunning, setBotRunning] = useState(false);
+  const [themeName, setThemeName] = useState('dark');
+
+  const theme = themes[themeName];
 
   return (
     <AppContext.Provider value={{
       symbol,
       setSymbol,
       botRunning,
-      setBotRunning
+      setBotRunning,
+      themeName,
+      setThemeName,
+      theme
     }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-// Hook to use the context
 export const useAppContext = () => useContext(AppContext);
