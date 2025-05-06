@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Trading Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="navbar">
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Markets</a></li>
+                    <li><a href="#">Portfolio</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="market-overview">
+                <h2>Market Overview</h2>
+                <div class="market-stats">
+                    <div class="stat-card">
+                        <h3>Bitcoin</h3>
+                        <p class="price">$55,000</p>
+                        <p class="change positive">+5.25%</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ethereum</h3>
+                        <p class="price">$4,200</p>
+                        <p class="change negative">-1.5%</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="charts">
+                <h2>Trading Charts</h2>
+                <div class="chart">
+                    <p>Chart will go here (e.g., using a charting library like Chart.js)</p>
+                </div>
+            </section>
+
+            <section class="recent-trades">
+                <h2>Recent Trades</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Pair</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>10:30 AM</td>
+                            <td>BTC/USD</td>
+                            <td>Buy</td>
+                            <td>0.5</td>
+                            <td>$55,000</td>
+                        </tr>
+                        <tr>
+                            <td>10:45 AM</td>
+                            <td>ETH/USD</td>
+                            <td>Sell</td>
+                            <td>1.2</td>
+                            <td>$4,200</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Trading Dashboard</p>
+        </footer>
+    </div>
+</body>
+</html>
