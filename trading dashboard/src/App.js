@@ -4,15 +4,15 @@ function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch('https://your-backend-api.com/trade')  // Replace with your actual API
+    fetch('https://your-backend-api.com/trade') // Replace with your API
       .then((res) => res.json())
-      .then((json) => setData(json))
-      .catch((err) => console.error('Error fetching data:', err));
+      .then(setData)
+      .catch(console.error);
   }, []);
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>Algo Trading Bot Status</h2>
+      <h2>Algo Trading Bot Dashboard</h2>
       {data ? (
         <div>
           <p>Symbol: {data.symbol}</p>
@@ -20,7 +20,7 @@ function App() {
           <p>Action: {data.action}</p>
         </div>
       ) : (
-        <p>Loading data...</p>
+        <p>Loading...</p>
       )}
     </div>
   );
