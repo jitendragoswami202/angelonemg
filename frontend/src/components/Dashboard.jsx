@@ -1,10 +1,22 @@
-import React from "react";
+import React from 'react';
+import MarketDataWidget from './MarketDataWidget';
+import PnLDisplay from './PnLDisplay';
+import Positions from './Positions';
+import OpenOrders from './OpenOrders';
+import TradeHistory from './TradeHistory';
+import BotControl from './BotControl';
+import FundsInfo from './FundsInfo';
 
 const Dashboard = () => {
   return (
     <div>
-      <h2>Dashboard</h2>
-      <p>Real-time market data and widgets will appear here.</p>
+      <BotControl />
+      <MarketDataWidget symbol="BINANCE:BTCUSDT" />
+      <FundsInfo />
+      <PnLDisplay />
+      <Positions />
+      <OpenOrders />
+      <TradeHistory />
     </div>
   );
 };
