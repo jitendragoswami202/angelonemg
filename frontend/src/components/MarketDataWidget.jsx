@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import TradingViewWidget from 'react-tradingview-widget';
+import { useAppContext } from '../context';
 
-const MarketDataWidget = ({ symbol = 'BINANCE:BTCUSDT' }) => {
+const MarketDataWidget = () => {
+  const { symbol } = useAppContext();
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ const MarketDataWidget = ({ symbol = 'BINANCE:BTCUSDT' }) => {
           theme: 'dark',
           style: '1',
           locale: 'en',
-          container_id: 'tv_chart_container',
+          container_id: 'tv_chart_container'
         });
       }
     };
