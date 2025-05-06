@@ -21,4 +21,20 @@ const Dashboard = () => {
   );
 };
 
+
+import React from 'react';
+import { useAppContext } from '../context';
+
+const ThemeToggle = () => {
+  const { themeName, setThemeName } = useAppContext();
+
+  return (
+    <button onClick={() => setThemeName(themeName === 'light' ? 'dark' : 'light')}>
+      Switch to {themeName === 'light' ? 'Dark' : 'Light'} Mode
+    </button>
+  );
+};
+
+export default ThemeToggle;
+
 export default Dashboard;
