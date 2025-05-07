@@ -126,7 +126,7 @@ header h1 {
 }
 
 input:checked + .slider {
-  background-color: blue;
+  background-color: var(--highlight);
 }
 
 input:checked + .slider::before {
@@ -141,21 +141,21 @@ input:checked + .slider::before {
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: blue;
+  color: var(--fg);
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
 #notifBtn:hover {
-  color: blue;
+  color: var(--highlight);
 }
 
 #notifPanel {
   position: absolute;
   top: 40px;
   right: 0;
-  background: black;
-  color: blue;
+  background: var(--card-bg);
+  color: var(--fg);
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
