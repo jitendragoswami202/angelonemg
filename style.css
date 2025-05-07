@@ -126,7 +126,7 @@ header h1 {
 }
 
 input:checked + .slider {
-  background-color: var(--highlight);
+  background-color: blue;
 }
 
 input:checked + .slider::before {
