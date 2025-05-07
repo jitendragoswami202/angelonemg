@@ -155,7 +155,7 @@ input:checked + .slider::before {
   top: 40px;
   right: 0;
   background: var(--card-bg);
-  color: var(--fg);
+  color: blue;
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
