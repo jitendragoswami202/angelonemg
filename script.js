@@ -151,3 +151,13 @@ function flashBackground() {
     widget.style.backgroundColor = "var(--card-bg)";
   }, 400);
 }
+async function fetchAngelData() {
+  try {
+    const res = await fetch('/.netlify/functions/angel-data');
+    const data = await res.json();
+    console.log("Angel Data:", data);
+    // Update your UI with the fetched data
+  } catch (err) {
+    console.error("Failed to fetch Angel data", err);
+  }
+}
