@@ -141,7 +141,7 @@ input:checked + .slider::before {
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: var(--fg);
+  color: blue;
   cursor: pointer;
   transition: color 0.3s ease;
 }
@@ -154,7 +154,7 @@ input:checked + .slider::before {
   position: absolute;
   top: 40px;
   right: 0;
-  background: blue;
+  background: black;
   color: blue;
   padding: 1rem;
   border: 1px solid var(--border);
