@@ -1,84 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Trading Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Trading Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <header>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Markets</a></li>
-                    <li><a href="#">Portfolio</a></li>
-                    <li><a href="#">Settings</a></li>
-                </ul>
-            </nav>
-        </header>
-
-        <main>
-            <section class="market-overview">
-                <h2>Market Overview</h2>
-                <div class="market-stats">
-                    <div class="stat-card">
-                        <h3>Bitcoin</h3>
-                        <p class="price">$55,000</p>
-                        <p class="change positive">+5.25%</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Ethereum</h3>
-                        <p class="price">$4,200</p>
-                        <p class="change negative">-1.5%</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="charts">
-                <h2>Trading Charts</h2>
-                <div class="chart">
-                    <p>Chart will go here (e.g., using a charting library like Chart.js)</p>
-                </div>
-            </section>
-
-            <section class="recent-trades">
-                <h2>Recent Trades</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Pair</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>10:30 AM</td>
-                            <td>BTC/USD</td>
-                            <td>Buy</td>
-                            <td>0.5</td>
-                            <td>$55,000</td>
-                        </tr>
-                        <tr>
-                            <td>10:45 AM</td>
-                            <td>ETH/USD</td>
-                            <td>Sell</td>
-                            <td>1.2</td>
-                            <td>$4,200</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 Trading Dashboard</p>
-        </footer>l
+  <header class="top-bar">
+    <div class="left">
+      <h1>Live Trading Dashboard</h1>
     </div>
+    <div class="right">
+      <div class="notifications">
+        <button id="notifBtn" aria-label="Notifications">🔔</button>
+        <div id="notifPanel" class="hidden">
+          <p>No new notifications</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="overview">
+    <div class="card">
+      <h3>Available Funds</h3>
+      <p id="funds">$50,000</p>
+    </div>
+    <div class="card">
+      <h3>Total P&L</h3>
+      <p id="pnl" class="pnl-positive">+2,350</p>
+    </div>
+    <div class="card">
+      <h3>Time</h3>
+      <p id="clock">--:--:--</p>
+    </div>
+    <div class="card toggle-container">
+      <div class="toggle-group">
+        <label>Algo Bot</label>
+        <label class="switch">
+          <input type="checkbox" id="algoToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-group">
+        <label>Dark Mode</label>
+        <label class="switch">
+          <input type="checkbox" id="darkModeToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <main class="main-grid">
+    <section class="widget">
+      <h2>Active Trade</h2>
+      <p>Symbol: <strong>BTC/USD</strong></p>
+      <p>Entry: $<span id="entryPrice">60,000</span> | Current: $<span id="currentPrice">62,000</span></p>
+      <button id="exitTradeBtn">Exit Trade</button>
+    </section>
+
+    <section class="widget">
+      <h2>Trade History</h2>
+      <ul id="tradeHistory"></ul>
+    </section>
+
+    <section class="widget">
+      <h2>Transaction History</h2>
+      <ul id="transactionHistory"></ul>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
