@@ -1,0 +1,8 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "main": "angel-data.js",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
