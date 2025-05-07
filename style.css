@@ -147,7 +147,7 @@ input:checked + .slider::before {
 }
 
 #notifBtn:hover {
-  color: var(--highlight);
+  color: blue;
 }
 
 #notifPanel {
