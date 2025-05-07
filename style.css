@@ -154,7 +154,7 @@ input:checked + .slider::before {
   position: absolute;
   top: 40px;
   right: 0;
-  background: var(--card-bg);
+  background: blue;
   color: blue;
   padding: 1rem;
   border: 1px solid var(--border);
